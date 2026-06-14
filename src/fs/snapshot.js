@@ -16,7 +16,16 @@ const snapshot = async () => {
 //     { "path": "subdir/nested.txt", "type": "file", "size": 512, "content": "nested file contents as base64 string" }
 //   ]
 // }
+
+
   const rootPath = path.resolve('workspace');
+
+  try {
+    await fs.access(rootPath)
+  } catch(e) {
+    throw new Error('FS operation failed');
+  }
+
   const entries = [];
 
   const scanDirectory = async (dirPath) => {
@@ -25,10 +34,10 @@ const snapshot = async () => {
     for (const file of files) {
         const filePath = path.join(dirPath, file.name);
         const relativePath = path.relative(rootPath, filePath);
-        
+
       if (file.isFile()) {
         const fileStat = await fs.stat(filePath);
-        const fileContent = await fs.readFile(filePath, 'utf-8');
+        const fileContent = await fs.readFile(filePath, {encoding: 'base64'});
 
         entries.push({
           "path": relativePath,
